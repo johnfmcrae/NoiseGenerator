@@ -158,7 +158,7 @@ void NoiseGeneratorPluginAudioProcessor::processBlock (juce::AudioBuffer<float>&
         buffer.clear (i, 0, buffer.getNumSamples());
 
     // get level value
-    auto levelSliderValue = treeState.getRawParameterValue(LEVEL_ID);
+    auto levelSliderValue = treeState.getRawParameterValue(LEVEL_ID)->load();
 
     //check noise type
     bool noiseIsWhite = treeState.getRawParameterValue(WHITE_ID)->load();
@@ -168,6 +168,9 @@ void NoiseGeneratorPluginAudioProcessor::processBlock (juce::AudioBuffer<float>&
     // so if this button is ON, then we don't want any noise, i.e. check if it is false
     if (!treeState.getRawParameterValue(STATE_ID)->load())
     {
+        // create a temp varaible to hold the dry signal
+        float drySig;
+        float wetSig;
         for (int channel = 0; channel < totalNumInputChannels; ++channel)
         {
             auto* channelData = buffer.getWritePointer(channel);
@@ -176,9 +179,33 @@ void NoiseGeneratorPluginAudioProcessor::processBlock (juce::AudioBuffer<float>&
             for (int sample = 0; sample < buffer.getNumSamples(); sample++)
             {
                 if (noiseIsWhite)
-                    channelData[sample] = random.nextFloat() * levelSliderValue->load() * 0.5; // white noise gen quieter than pink noise
+                {
+                    // white noise generation is quieter than pink noise
+                    //channelData[sample] = random.nextFloat() * levelSliderValue->load() * 0.5; 
+
+                    // fill dry signal with current sample
+                    drySig = buffer.getSample(channel, sample);
+                    // multiply by 1 - the slider value
+                    drySig *= (1.0 - levelSliderValue);
+                    // multiply the wet signal (noise) by the slider value
+                    wetSig  = random.nextFloat() * levelSliderValue;
+                    // add the dry and the wet to mix
+                    channelData[sample] = drySig + wetSig;
+
+                }   
                 else if (noiseIsPink)
-                    channelData[sample] = nP.generate() * levelSliderValue->load();
+                {
+                    //channelData[sample] = nP.generate() * levelSliderValue;
+
+                    // fill dry signal with current sample
+                    drySig = buffer.getSample(channel, sample);
+                    // multiply by 1 - the slider value
+                    drySig *= (1.0 - levelSliderValue);
+                    // multiply the wet signal (noise) by the slider value
+                    wetSig = nP.generate() * levelSliderValue;
+                    // add the dry and the wet to mix
+                    channelData[sample] = drySig + wetSig;
+                }  
                 else
                     channelData[sample] = buffer.getSample(channel, sample); // should never happen, but here as a catch
             }
@@ -195,7 +222,7 @@ void NoiseGeneratorPluginAudioProcessor::processBlock (juce::AudioBuffer<float>&
             // modify the volume by multiplying each sample value
             for (int sample = 0; sample < buffer.getNumSamples(); sample++)
             {
-                channelData[sample] = buffer.getSample(channel, sample) * levelSliderValue->load();
+                channelData[sample] = buffer.getSample(channel, sample) * levelSliderValue;
             }
         }
     }
