@@ -3,7 +3,8 @@
 
     PinkNoise.h
     Created: 23 Jun 2020 1:31:08pm
-    Author:  John
+    Last updated: 31 July 2020 5:47 pm
+    Author:  John F. McRae
 
   ==============================================================================
 */
@@ -14,12 +15,18 @@
 class PinkNoise
 {
 private:
+    // random noise generator from the JUCE library
     juce::Random noiseSrc;
-    std::vector<float> pinkRows; // each row effectively holds an independednt random number generator
-    float pinkRunSum; // running sum
-    int pinkIndex; // the column index, incremented each sample
+    // each row effectively holds an independent random number generator
+    std::vector<float> pinkRows;
+    // running sum for noise output
+    float pinkRunSum;
+    // the column index, incremented each sample
+    int pinkIndex; 
+    // the row mask, which ensures that the index of the pinkRows vector is never exceeded
     int pinkIndexMask;
-    float pinkNorm; // used to normalize the noise at the output
+    // used to normalize the noise at the output
+    float pinkNorm;
 
 public:
     // constructor, overload to initialize with 12 rows, which worked out to be a
