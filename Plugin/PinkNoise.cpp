@@ -86,7 +86,7 @@ void PinkNoise::setRows(int newRows)
     // reset pinkIndex
     pinkIndex = 0;
     pinkIndexMask = (1 << newRows) - 1;
-    pinkNorm = 1.0 / (numRows +1);
+    pinkNorm = 1.0 / (newRows +1);
     // clear the pinkRows vector
     pinkRows.clear();
     // reinitialize the pinkRows vector
