@@ -31,7 +31,7 @@ PinkNoise::PinkNoise(int numRows)
     // mask the index so it does not spill outside of the pinkRows vector range
     pinkIndexMask = (1 << numRows) - 1;
     // initialize normalization variable
-    pinkNorm = 1.0 / (numRows +1);
+    pinkNorm = 1.0 / (numRows + 1);
     // in testing, I found it was better to initialize the rows with noise
     // this avoids a climb up to some max value during the first run through the rows
     for (int i = 0; i < numRows; i++)
@@ -86,7 +86,7 @@ void PinkNoise::setRows(int newRows)
     // reset pinkIndex
     pinkIndex = 0;
     pinkIndexMask = (1 << newRows) - 1;
-    pinkNorm = 1.0 / (newRows +1);
+    pinkNorm = 1.0 / (newRows + 1);
     // clear the pinkRows vector
     pinkRows.clear();
     // reinitialize the pinkRows vector

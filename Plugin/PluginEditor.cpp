@@ -10,11 +10,12 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-NoiseGeneratorPluginAudioProcessorEditor::NoiseGeneratorPluginAudioProcessorEditor (NoiseGeneratorPluginAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p)
+NoiseGeneratorPluginAudioProcessorEditor::NoiseGeneratorPluginAudioProcessorEditor(NoiseGeneratorPluginAudioProcessor& p)
+    : AudioProcessorEditor(&p), audioProcessor(p)
 {
     // Apple II font from http://www.kreativekorp.com/software/fonts/apple2.shtml
-    LookAndFeel::getDefaultLookAndFeel().setDefaultSansSerifTypefaceName("Print Char 21");
+    // this line is important to ensure that the custom font is used
+    LookAndFeel::setDefaultLookAndFeel(&oldSchoolLookAndFeel);
 
     // LABELS
     titleLabel.setText("Noise Generator", dontSendNotification);
@@ -32,8 +33,8 @@ NoiseGeneratorPluginAudioProcessorEditor::NoiseGeneratorPluginAudioProcessorEdit
 
     // BUTTONS
     // attach the value tree to the buttons
-    wAttach   = std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.treeState, WHITE_ID, wButton);
-    pAttach   = std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.treeState, PINK_ID,  pButton);
+    wAttach = std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.treeState, WHITE_ID, wButton);
+    pAttach = std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.treeState, PINK_ID, pButton);
     offAttach = std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.treeState, STATE_ID, offButton);
 
     // set formatting
@@ -85,7 +86,7 @@ NoiseGeneratorPluginAudioProcessorEditor::NoiseGeneratorPluginAudioProcessorEdit
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (320, 180);
+    setSize(320, 180);
 }
 
 NoiseGeneratorPluginAudioProcessorEditor::~NoiseGeneratorPluginAudioProcessorEditor()
@@ -93,7 +94,7 @@ NoiseGeneratorPluginAudioProcessorEditor::~NoiseGeneratorPluginAudioProcessorEdi
 }
 
 //==============================================================================
-void NoiseGeneratorPluginAudioProcessorEditor::paint (juce::Graphics& g)
+void NoiseGeneratorPluginAudioProcessorEditor::paint(juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(Colours::black);

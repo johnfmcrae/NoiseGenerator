@@ -22,7 +22,7 @@ private:
     // running sum for noise output
     float pinkRunSum;
     // the column index, incremented each sample
-    int pinkIndex; 
+    int pinkIndex;
     // the row mask, which ensures that the index of the pinkRows vector is never exceeded
     int pinkIndexMask;
     // used to normalize the noise at the output

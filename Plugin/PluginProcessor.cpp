@@ -12,14 +12,14 @@
 //==============================================================================
 NoiseGeneratorPluginAudioProcessor::NoiseGeneratorPluginAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
-                      #endif
-                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
-                     #endif
-                       ),
+    : AudioProcessor(BusesProperties()
+#if ! JucePlugin_IsMidiEffect
+#if ! JucePlugin_IsSynth
+        .withInput("Input", juce::AudioChannelSet::stereo(), true)
+#endif
+        .withOutput("Output", juce::AudioChannelSet::stereo(), true)
+#endif
+    ),
     treeState(*this, nullptr, "PARAMETERS", createParameterLayout())
 #endif
 {
@@ -35,10 +35,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout NoiseGeneratorPluginAudioPro
     AudioProcessorValueTreeState::ParameterLayout layout;
 
     // add the respective parameters
-    layout.add(std::make_unique<AudioParameterFloat>(LEVEL_ID,  LEVEL_NAME, 0.0f, 1.0f, 0.0f));
-    layout.add(std::make_unique<AudioParameterBool> (WHITE_ID,  WHITE_NAME,  false));
-    layout.add(std::make_unique<AudioParameterBool> (PINK_ID,   PINK_NAME,   false));
-    layout.add(std::make_unique<AudioParameterBool> (STATE_ID,  STATE_NAME,  true));
+    layout.add(std::make_unique<AudioParameterFloat>(LEVEL_ID, LEVEL_NAME, 0.0f, 1.0f, 0.0f));
+    layout.add(std::make_unique<AudioParameterBool>(WHITE_ID, WHITE_NAME, false));
+    layout.add(std::make_unique<AudioParameterBool>(PINK_ID, PINK_NAME, false));
+    layout.add(std::make_unique<AudioParameterBool>(STATE_ID, STATE_NAME, true));
 
     return layout;
 }
@@ -51,29 +51,29 @@ const juce::String NoiseGeneratorPluginAudioProcessor::getName() const
 
 bool NoiseGeneratorPluginAudioProcessor::acceptsMidi() const
 {
-   #if JucePlugin_WantsMidiInput
+#if JucePlugin_WantsMidiInput
     return true;
-   #else
+#else
     return false;
-   #endif
+#endif
 }
 
 bool NoiseGeneratorPluginAudioProcessor::producesMidi() const
 {
-   #if JucePlugin_ProducesMidiOutput
+#if JucePlugin_ProducesMidiOutput
     return true;
-   #else
+#else
     return false;
-   #endif
+#endif
 }
 
 bool NoiseGeneratorPluginAudioProcessor::isMidiEffect() const
 {
-   #if JucePlugin_IsMidiEffect
+#if JucePlugin_IsMidiEffect
     return true;
-   #else
+#else
     return false;
-   #endif
+#endif
 }
 
 double NoiseGeneratorPluginAudioProcessor::getTailLengthSeconds() const
@@ -92,21 +92,21 @@ int NoiseGeneratorPluginAudioProcessor::getCurrentProgram()
     return 0;
 }
 
-void NoiseGeneratorPluginAudioProcessor::setCurrentProgram (int index)
+void NoiseGeneratorPluginAudioProcessor::setCurrentProgram(int index)
 {
 }
 
-const juce::String NoiseGeneratorPluginAudioProcessor::getProgramName (int index)
+const juce::String NoiseGeneratorPluginAudioProcessor::getProgramName(int index)
 {
     return {};
 }
 
-void NoiseGeneratorPluginAudioProcessor::changeProgramName (int index, const juce::String& newName)
+void NoiseGeneratorPluginAudioProcessor::changeProgramName(int index, const juce::String& newName)
 {
 }
 
 //==============================================================================
-void NoiseGeneratorPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void NoiseGeneratorPluginAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
@@ -119,33 +119,33 @@ void NoiseGeneratorPluginAudioProcessor::releaseResources()
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool NoiseGeneratorPluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool NoiseGeneratorPluginAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
 {
-  #if JucePlugin_IsMidiEffect
-    juce::ignoreUnused (layouts);
+#if JucePlugin_IsMidiEffect
+    juce::ignoreUnused(layouts);
     return true;
-  #else
+#else
     // This is the place where you check if the layout is supported.
     // In this template code we only support mono or stereo.
     if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
-     && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
+        && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
 
     // This checks if the input layout matches the output layout
-   #if ! JucePlugin_IsSynth
+#if ! JucePlugin_IsSynth
     if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
         return false;
-   #endif
+#endif
 
     return true;
-  #endif
+#endif
 }
 #endif
 
-void NoiseGeneratorPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+void NoiseGeneratorPluginAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels  = getTotalNumInputChannels();
+    auto totalNumInputChannels = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
     // In case we have more outputs than inputs, this code clears any output
@@ -155,14 +155,14 @@ void NoiseGeneratorPluginAudioProcessor::processBlock (juce::AudioBuffer<float>&
     // when they first compile a plugin, but obviously you don't need to keep
     // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
+        buffer.clear(i, 0, buffer.getNumSamples());
 
     // get level value
     auto levelSliderValue = treeState.getRawParameterValue(LEVEL_ID)->load();
 
     //check noise type
     bool noiseIsWhite = treeState.getRawParameterValue(WHITE_ID)->load();
-    bool noiseIsPink  = treeState.getRawParameterValue(PINK_ID)->load();
+    bool noiseIsPink = treeState.getRawParameterValue(PINK_ID)->load();
 
     // check if noise is on. Recall that we are checking an "OFF" button,
     // so if this button is ON, then we don't want any noise, i.e. check if it is false
@@ -188,11 +188,11 @@ void NoiseGeneratorPluginAudioProcessor::processBlock (juce::AudioBuffer<float>&
                     // multiply by 1 - the slider value
                     drySig *= (1.0 - levelSliderValue);
                     // multiply the wet signal (noise) by the slider value
-                    wetSig  = random.nextFloat() * levelSliderValue;
+                    wetSig = random.nextFloat() * levelSliderValue;
                     // add the dry and the wet to mix
                     channelData[sample] = drySig + wetSig;
 
-                }   
+                }
                 else if (noiseIsPink)
                 {
                     //channelData[sample] = nP.generate() * levelSliderValue;
@@ -205,7 +205,7 @@ void NoiseGeneratorPluginAudioProcessor::processBlock (juce::AudioBuffer<float>&
                     wetSig = nP.generate() * levelSliderValue;
                     // add the dry and the wet to mix
                     channelData[sample] = drySig + wetSig;
-                }  
+                }
                 else
                     channelData[sample] = buffer.getSample(channel, sample); // should never happen, but here as a catch
             }
@@ -236,11 +236,11 @@ bool NoiseGeneratorPluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* NoiseGeneratorPluginAudioProcessor::createEditor()
 {
-    return new NoiseGeneratorPluginAudioProcessorEditor (*this);
+    return new NoiseGeneratorPluginAudioProcessorEditor(*this);
 }
 
 //==============================================================================
-void NoiseGeneratorPluginAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
+void NoiseGeneratorPluginAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
 {
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
@@ -250,7 +250,7 @@ void NoiseGeneratorPluginAudioProcessor::getStateInformation (juce::MemoryBlock&
     copyXmlToBinary(*xml, destData);
 }
 
-void NoiseGeneratorPluginAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+void NoiseGeneratorPluginAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
