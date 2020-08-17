@@ -12,7 +12,8 @@
 MainComponent::MainComponent()
 {
     // Apple II font from http://www.kreativekorp.com/software/fonts/apple2.shtml
-    LookAndFeel::getDefaultLookAndFeel().setDefaultSansSerifTypefaceName("Print Char 21");
+    // this line is important to ensure that the custom font is used
+    LookAndFeel::setDefaultLookAndFeel(&LaF);
 
     // LABELS
     titleLabel.setText("Noise Generator", dontSendNotification);
@@ -29,7 +30,7 @@ MainComponent::MainComponent()
     addAndMakeVisible(&levelLabel);
 
     // BUTTONS
-    setupOldSchoolAndFeelColours(oldSchoolLookAndFeel);
+    setupOldSchoolAndFeelColours(LaF);
 
     wButton.setButtonText("White");
     pButton.setButtonText("Pink");
@@ -46,10 +47,10 @@ MainComponent::MainComponent()
     offButton.setRadioGroupId(NoiseButtons);
 
     // set formatting
-    wButton.setLookAndFeel(&oldSchoolLookAndFeel);
-    pButton.setLookAndFeel(&oldSchoolLookAndFeel);
-    offButton.setLookAndFeel(&oldSchoolLookAndFeel);
-    stereoB.setLookAndFeel(&oldSchoolLookAndFeel);
+    wButton.setLookAndFeel(&LaF);
+    pButton.setLookAndFeel(&LaF);
+    offButton.setLookAndFeel(&LaF);
+    stereoB.setLookAndFeel(&LaF);
 
     // Set edges for the noise selection row
     wButton.setConnectedEdges(2);
@@ -72,7 +73,7 @@ MainComponent::MainComponent()
     levelSlider.setSliderStyle(Slider::LinearBar);
     levelSlider.setRange(0.0, 0.5);
     levelSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
-    levelSlider.setLookAndFeel(&oldSchoolLookAndFeel);
+    levelSlider.setLookAndFeel(&LaF);
     levelSlider.setColour(Slider::backgroundColourId, Colours::black);
     addAndMakeVisible(&levelSlider);
 
@@ -211,14 +212,14 @@ void MainComponent::resized()
     // update their positions.
     titleLabel.setBoundsRelative(0.1, 0.045, 0.8, 0.15);
 
-    wButton.setBoundsRelative  (0.125, 0.235, 0.25, 0.15);
-    pButton.setBoundsRelative  (0.375, 0.235, 0.25, 0.15);
+    wButton.setBoundsRelative(0.125, 0.235, 0.25, 0.15);
+    pButton.setBoundsRelative(0.375, 0.235, 0.25, 0.15);
     offButton.setBoundsRelative(0.625, 0.235, 0.25, 0.15);
 
     stereoB.setBoundsRelative(0.3, 0.425, 0.4, 0.15);
 
     levelSlider.setBoundsRelative(0.1, 0.615, 0.8, 0.16);
-    levelLabel.setBoundsRelative (0.1, 0.795, 0.8, 0.15);
+    levelLabel.setBoundsRelative(0.1, 0.795, 0.8, 0.15);
 }
 
 void MainComponent::updateToggleState(Button* button, String name)
