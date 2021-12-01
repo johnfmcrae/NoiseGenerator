@@ -45,8 +45,13 @@ private:
     // GUI object declarations
     TextButton wButton;
     TextButton pButton;
-    TextButton offButton;
+    TextButton bButton;
+    TextButton onButton;
+    TextButton dcButton;
+    TextButton avgButton;
     Slider levelSlider;
+    Slider dcSlider;
+    Slider avgSlider;
     Label titleLabel;
     Label levelLabel;
 
@@ -55,10 +60,15 @@ private:
 
 public:
     //  std::unique_ptr < juce::AudioProcessorValueTreeState::SliderAttachment > sliderAttach;
-    std::unique_ptr <AudioProcessorValueTreeState::SliderAttachment> levelAttach;
     std::unique_ptr <AudioProcessorValueTreeState::ButtonAttachment> wAttach;
     std::unique_ptr <AudioProcessorValueTreeState::ButtonAttachment> pAttach;
-    std::unique_ptr <AudioProcessorValueTreeState::ButtonAttachment> offAttach;
-
+    std::unique_ptr <AudioProcessorValueTreeState::ButtonAttachment> bAttach;
+    std::unique_ptr <AudioProcessorValueTreeState::ButtonAttachment> onAttach;
+    std::unique_ptr <AudioProcessorValueTreeState::ButtonAttachment> dcAttach;
+    std::unique_ptr <AudioProcessorValueTreeState::ButtonAttachment> avgAttach;
+    std::unique_ptr <AudioProcessorValueTreeState::SliderAttachment> levelAttach;
+    std::unique_ptr <AudioProcessorValueTreeState::SliderAttachment> dcSliderAttach;
+    std::unique_ptr <AudioProcessorValueTreeState::SliderAttachment> avgSliderAttach;
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NoiseGeneratorPluginAudioProcessorEditor)
 };

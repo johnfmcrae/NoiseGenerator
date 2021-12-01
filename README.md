@@ -1,6 +1,8 @@
 # NoiseGenerator
-The noise generator can synthesize either white or pink noise, either in mono or stereo. A standalone Windows version as well as a VST plugin version have been being developed.
+The noise generator is a simple plugin which generates either white, pink or brown noise. In addition, there is a DC blocking filter and a smoothing filter which can be applied to the output as well. This plugin is an effect, so any inputs passing into this plugin will be mixed with the noise level at the output.
 
-This program has been developped using the JUCE framework https://juce.com/
+The Builds folder contains the VST as well as a standalone version for Mac OS. The Windows standalone executable is an earlier version of the program and produces only white and pink noise and no filtering.
 
-An executable file for the Windows version can be found in the Standalone folder for those who want to run the app but who don't have the means to compile it themselves. Likewise, a VST3 file can be found in the Plugin folder.
+The Source folder contains a header file, NoiseGenerator, which contains all of the noise generating algorithms as well as the filters. These algorithms make some use of the JUCE framework for noise generation, but otherwise need not be specific to audio applications. The outputs of the generator are in the range [-1,1], as is suitable for audio.
+
+This program has been developed using the JUCE framework https://juce.com/

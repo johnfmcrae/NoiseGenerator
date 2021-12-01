@@ -10,6 +10,7 @@
 #include "PluginEditor.h"
 
 //==============================================================================
+// Constructor
 NoiseGeneratorPluginAudioProcessor::NoiseGeneratorPluginAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
     : AudioProcessor(BusesProperties()
@@ -35,10 +36,17 @@ juce::AudioProcessorValueTreeState::ParameterLayout NoiseGeneratorPluginAudioPro
     AudioProcessorValueTreeState::ParameterLayout layout;
 
     // add the respective parameters
-    layout.add(std::make_unique<AudioParameterFloat>(LEVEL_ID, LEVEL_NAME, 0.0f, 1.0f, 0.0f));
+    // BUTTONS
     layout.add(std::make_unique<AudioParameterBool>(WHITE_ID, WHITE_NAME, false));
     layout.add(std::make_unique<AudioParameterBool>(PINK_ID, PINK_NAME, false));
+    layout.add(std::make_unique<AudioParameterBool>(BROWN_ID, BROWN_NAME, false));
     layout.add(std::make_unique<AudioParameterBool>(STATE_ID, STATE_NAME, true));
+    layout.add(std::make_unique<AudioParameterBool>(DC_ID, DC_NAME, true));
+    layout.add(std::make_unique<AudioParameterBool>(AVG_ID, AVG_NAME, true));
+    // SLIDERS
+    layout.add(std::make_unique<AudioParameterFloat>(LEVEL_ID, LEVEL_NAME, 0.0f, 1.0f, 0.0f));
+    layout.add(std::make_unique<AudioParameterFloat>(DC_SLIDER_ID, DC_SLIDER_NAME, 0.0f, 1.0f, 0.0f));
+    layout.add(std::make_unique<AudioParameterFloat>(AVG_SLIDER_ID, AVG_SLIDER_NAME, 1.0f, 2.0f, 1.0f)); // CHECK - min, max, default?
 
     return layout;
 }
@@ -157,16 +165,37 @@ void NoiseGeneratorPluginAudioProcessor::processBlock(juce::AudioBuffer<float>& 
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
-    // get level value
-    auto levelSliderValue = treeState.getRawParameterValue(LEVEL_ID)->load();
+
 
     //check noise type
     bool noiseIsWhite = treeState.getRawParameterValue(WHITE_ID)->load();
-    bool noiseIsPink = treeState.getRawParameterValue(PINK_ID)->load();
+    bool noiseIsPink  = treeState.getRawParameterValue(PINK_ID)->load();
+    bool noiseIsBrown = treeState.getRawParameterValue(BROWN_ID)->load();
+    bool dc_filter    = treeState.getRawParameterValue(DC_ID)->load();
+    bool smoothing    = treeState.getRawParameterValue(AVG_ID)->load();
+    
+    // TO DO
+    // check filter slider state changes
+    
+    // get slider values
+    float levelSliderValue = treeState.getRawParameterValue(LEVEL_ID)->load();
+//    float dcSliderValue    = treeState.getRawParameterValue(DC_SLIDER_ID)->load();
+//    int   avgSliderValue   = treeState.getRawParameterValue(AVG_SLIDER_ID)->load();
+    
+    // check slider values and update filters if changed
+//    filterWhite.setDCfiltConst(dcSliderValue);
+//    filterPink.setDCfiltConst(dcSliderValue);
+//    filterBrown.setDCfiltConst(dcSliderValue);
+//    if (avgSliderValue != smoothLength)
+//    {
+//        filterWhite.setSmoothLength(avgSliderValue);
+//        filterPink.setSmoothLength(avgSliderValue);
+//        filterBrown.setSmoothLength(avgSliderValue);
+//        smoothLength = avgSliderValue;
+//    }
 
-    // check if noise is on. Recall that we are checking an "OFF" button,
-    // so if this button is ON, then we don't want any noise, i.e. check if it is false
-    if (!treeState.getRawParameterValue(STATE_ID)->load())
+    // check if noise is on
+    if (treeState.getRawParameterValue(STATE_ID)->load())
     {
         // create a temp varaible to hold the dry signal
         float drySig;
@@ -180,29 +209,59 @@ void NoiseGeneratorPluginAudioProcessor::processBlock(juce::AudioBuffer<float>& 
             {
                 if (noiseIsWhite)
                 {
-                    // white noise generation is quieter than pink noise
-                    //channelData[sample] = random.nextFloat() * levelSliderValue->load() * 0.5; 
-
                     // fill dry signal with current sample
                     drySig = buffer.getSample(channel, sample);
                     // multiply by 1 - the slider value
                     drySig *= (1.0 - levelSliderValue);
-                    // multiply the wet signal (noise) by the slider value
-                    wetSig = random.nextFloat() * levelSliderValue;
+                    // noise source
+                    wetSig = random.nextFloat();
+                    //smoothing
+                    if (smoothing)
+                        wetSig = filterWhite.smoothing_filter(wetSig);
+                    // dc block
+                    if (dc_filter)
+                        wetSig = filterWhite.dc_blocking_filter(wetSig);
+                    // level adjust
+                    wetSig = wetSig * levelSliderValue;
                     // add the dry and the wet to mix
                     channelData[sample] = drySig + wetSig;
 
                 }
                 else if (noiseIsPink)
                 {
-                    //channelData[sample] = nP.generate() * levelSliderValue;
-
                     // fill dry signal with current sample
                     drySig = buffer.getSample(channel, sample);
                     // multiply by 1 - the slider value
                     drySig *= (1.0 - levelSliderValue);
-                    // multiply the wet signal (noise) by the slider value
-                    wetSig = nP.generate() * levelSliderValue;
+                    // noise source
+                    wetSig = nP.generate();
+                    // smoothing
+                    if (smoothing)
+                        wetSig = filterPink.smoothing_filter(wetSig);
+                    // dc filter
+                    if (dc_filter)
+                        wetSig = filterPink.dc_blocking_filter(wetSig);
+                    // level adjust
+                    wetSig = wetSig * levelSliderValue;
+                    // add the dry and the wet to mix
+                    channelData[sample] = drySig + wetSig;
+                }
+                else if (noiseIsBrown)
+                {
+                    // fill dry signal with current sample
+                    drySig = buffer.getSample(channel, sample);
+                    // multiply by 1 - the slider value
+                    drySig *= (1.0 - levelSliderValue);
+                    // noise source
+                    wetSig = nB.generate();
+                    // smoothing
+                    if (smoothing)
+                        wetSig = filterBrown.smoothing_filter(wetSig);
+                    // dc filter
+                    if (dc_filter)
+                        wetSig = filterBrown.dc_blocking_filter(wetSig);
+                    // level adjust
+                    wetSig = wetSig * levelSliderValue;
                     // add the dry and the wet to mix
                     channelData[sample] = drySig + wetSig;
                 }
@@ -210,7 +269,6 @@ void NoiseGeneratorPluginAudioProcessor::processBlock(juce::AudioBuffer<float>& 
                     channelData[sample] = buffer.getSample(channel, sample); // should never happen, but here as a catch
             }
         }
-
     }
     // if noise is off, use the slider as a level adjust
     else
